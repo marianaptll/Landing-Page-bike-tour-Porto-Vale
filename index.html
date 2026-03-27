@@ -1,0 +1,1534 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Porto Vale Consórcio — Bike Tour</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,600;0,700;0,800;0,900;1,700&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
+
+  <style>
+    /* ─────────────────────────────────────
+       RESET & TOKENS
+    ───────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --dark:        #060A12;
+      --card-bg:     #0D1826;
+      --card-border: #192840;
+      --accent:      #00C8FF;
+      --accent2:     #0088CC;
+      --accent-dim:  rgba(0,200,255,0.10);
+      --white:       #EEF4FF;
+      --gray:        #556070;
+      --light-gray:  #8AAAB8;
+      --placeholder: #0F1E2E;
+      --radius:      14px;
+      --font-d: 'Barlow Condensed', sans-serif;
+      --font-b: 'DM Sans', sans-serif;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--dark);
+      color: var(--white);
+      font-family: var(--font-b);
+      width: 100%;
+      max-width: 430px;
+      margin: 0 auto;
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Diagonal speed-line texture */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: repeating-linear-gradient(
+        -62deg,
+        transparent,
+        transparent 44px,
+        rgba(0,200,255,0.018) 44px,
+        rgba(0,200,255,0.018) 45px
+      );
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ─────────────────────────────────────
+       @PROPERTY (glow card)
+    ───────────────────────────────────── */
+    @property --hue            { syntax: "<number>"; inherits: true;  initial-value: 0;    }
+    @property --rotate         { syntax: "<number>"; inherits: true;  initial-value: -70;  }
+    @property --bg-x           { syntax: "<number>"; inherits: true;  initial-value: 0;    }
+    @property --bg-y           { syntax: "<number>"; inherits: true;  initial-value: 0;    }
+    @property --glow-translate-y { syntax: "<number>"; inherits: true; initial-value: -65; }
+    @property --glow-blur      { syntax: "<number>"; inherits: true;  initial-value: 6;    }
+    @property --glow-opacity   { syntax: "<number>"; inherits: true;  initial-value: 1;    }
+    @property --glow-scale     { syntax: "<number>"; inherits: true;  initial-value: 1.5;  }
+    @property --glow-radius    { syntax: "<number>"; inherits: true;  initial-value: 100;  }
+
+    /* ─────────────────────────────────────
+       ANIMATIONS
+    ───────────────────────────────────── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(26px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to   { opacity: 1; }
+    }
+    @keyframes pulseRing {
+      0%   { box-shadow: 0 0 0 0 rgba(0,200,255,0.65); }
+      70%  { box-shadow: 0 0 0 20px rgba(0,200,255,0); }
+      100% { box-shadow: 0 0 0 0 rgba(0,200,255,0); }
+    }
+    .fade-up  { animation: fadeUp 0.80s cubic-bezier(0.22,1,0.36,1) both; }
+
+    /* Scroll reveal */
+    .reveal {
+      opacity: 0;
+      transform: translateY(32px);
+      transition: opacity 0.65s cubic-bezier(0.22,1,0.36,1),
+                  transform 0.65s cubic-bezier(0.22,1,0.36,1);
+    }
+    .reveal.revealed {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .delay-1  { animation-delay: 0.15s; }
+    .delay-2  { animation-delay: 0.32s; }
+    .fade-in  { animation: fadeIn 1s ease both; }
+
+    /* ─────────────────────────────────────
+       1. HERO
+    ───────────────────────────────────── */
+    .hero {
+      position: relative;
+      width: 100%;
+      height: 480px;
+      overflow: hidden;
+    }
+    .hero-logo {
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      z-index: 10;
+      animation: fadeIn 0.8s ease both;
+      background: rgba(6,10,18,0.82);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      padding: 18px 20px;
+      display: flex;
+      justify-content: center;
+      border-bottom: 1px solid rgba(0,200,255,0.18);
+    }
+    /* Bright center accent on logo bar */
+    .hero-logo::after {
+      content: '';
+      position: absolute;
+      bottom: -1px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 64px;
+      height: 2px;
+      background: var(--accent);
+      border-radius: 1px;
+    }
+    .hero-logo img { width: 140px; display: block; }
+
+    /* ── mountain bridge ── */
+    .mountain-bridge {
+      width: 100%;
+      margin-top: -90px;
+      position: relative;
+      z-index: 10;
+    }
+    .mountain-bridge img { width: 100%; display: block; }
+
+    /* ── hero text overlay ── */
+    .hero-area { position: relative; }
+    .hero-texts-overlay {
+      position: absolute;
+      inset: 0;
+      z-index: 30;
+      pointer-events: none;
+    }
+    .welcome {
+      position: absolute;
+      bottom: 320px;
+      left: 0; right: 0;
+      text-align: center;
+      padding: 16px 28px 10px;
+      pointer-events: auto;
+    }
+    .welcome h1 {
+      font-family: var(--font-d);
+      font-size: 42px;
+      font-weight: 900;
+      line-height: 1.2;
+      color: var(--white);
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      text-shadow: 0 2px 20px rgba(6,10,18,0.70);
+    }
+    .welcome h1 em {
+      font-style: normal;
+      color: var(--accent);
+      display: block;
+      font-size: 0.78em;
+      font-weight: 400;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      line-height: 1.2;
+    }
+    .welcome-diamond {
+      display: block;
+      width: 10px;
+      height: 10px;
+      background: var(--accent);
+      transform: rotate(45deg);
+      margin: 12px auto 0;
+      border-radius: 2px;
+    }
+
+    .tagline {
+      position: absolute;
+      bottom: 210px;
+      left: 0; right: 0;
+      text-align: center;
+      padding: 8px 28px 16px;
+      pointer-events: auto;
+    }
+    .tagline p {
+      font-family: var(--font-d);
+      font-size: 22px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      color: var(--white);
+      line-height: 1.4;
+      text-shadow: 0 2px 12px rgba(6,10,18,0.60);
+    }
+    .tagline p em {
+      font-style: normal;
+      color: var(--accent);
+    }
+
+    /* ─────────────────────────────────────
+       4. VIDEO SECTION 1
+    ───────────────────────────────────── */
+    .mountain-section {
+      background: var(--dark);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 0 0 44px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .play-label {
+      font-family: var(--font-d);
+      font-size: 38px;
+      font-weight: 900;
+      letter-spacing: 2.5px;
+      text-transform: uppercase;
+      color: var(--white);
+      margin-bottom: 26px;
+      text-align: center;
+      position: relative;
+    }
+    .play-label::after {
+      content: '';
+      display: block;
+      width: 44px;
+      height: 3px;
+      background: var(--accent);
+      margin: 9px auto 0;
+      border-radius: 2px;
+    }
+
+    /* ─── video block ─── */
+    .video-wrap { width: calc(100% - 48px); }
+    .video-block {
+      width: 100%;
+      aspect-ratio: 9 / 16;
+      background: var(--placeholder);
+      border-radius: var(--radius);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+      border: 1px solid var(--card-border);
+      box-shadow:
+        0 0 0 1px rgba(0,200,255,0.06),
+        0 0 50px rgba(0,200,255,0.07),
+        0 24px 64px rgba(0,0,0,0.55);
+    }
+    .vid-label {
+      font-family: var(--font-d);
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--gray);
+      letter-spacing: 5px;
+      text-transform: uppercase;
+    }
+    .play-btn {
+      position: absolute;
+      width: 66px;
+      height: 66px;
+      border-radius: 50%;
+      background: var(--accent);
+      border: none;
+      outline: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      animation: pulseRing 2.6s ease-out infinite;
+      transition: transform 0.20s, background 0.20s;
+      z-index: 2;
+    }
+    .play-btn svg { margin-left: 6px; }
+    .play-btn:active { transform: scale(0.89); background: var(--accent2); animation: none; }
+
+    /* ─────────────────────────────────────
+       5. DESCRIPTION
+    ───────────────────────────────────── */
+    .description-text {
+      font-size: 15px;
+      line-height: 1.88;
+      color: var(--light-gray);
+      text-align: center;
+      padding: 26px 36px 0;
+      font-weight: 400;
+    }
+
+    /* ─────────────────────────────────────
+       6. DESTAQUES
+    ───────────────────────────────────── */
+    .destaques {
+      background: var(--dark);
+      padding: 0 20px 52px;
+      position: relative;
+      z-index: 1;
+    }
+    .section-title {
+      font-family: var(--font-d);
+      font-size: 46px;
+      font-weight: 900;
+      letter-spacing: 0.5px;
+      color: var(--white);
+      text-align: center;
+      line-height: 1.0;
+      margin-bottom: 34px;
+      text-transform: uppercase;
+      position: relative;
+    }
+    .section-title .accent-word {
+      display: block;
+      font-size: 22px;
+      font-weight: 400;
+      letter-spacing: 2px;
+      color: var(--accent);
+      opacity: 0.75;
+      margin-top: 6px;
+      text-transform: uppercase;
+    }
+    .section-title::after {
+      content: '';
+      display: block;
+      width: 52px;
+      height: 3px;
+      background: linear-gradient(90deg, var(--accent), transparent);
+      margin: 10px auto 0;
+      border-radius: 2px;
+    }
+
+    .cards-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius);
+      padding: 22px 14px 20px;
+      min-height: 108px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      gap: 12px;
+      position: relative;
+      overflow: hidden;
+      transition: border-color 0.28s, transform 0.20s, box-shadow 0.28s;
+    }
+    /* Left accent bar — grows in on scroll */
+    .card::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 18%;
+      bottom: 18%;
+      width: 2.5px;
+      background: var(--accent);
+      border-radius: 0 2px 2px 0;
+      transform: scaleY(0);
+      transform-origin: center;
+      transition: transform 0.38s cubic-bezier(0.22,1,0.36,1), opacity 0.28s;
+      opacity: 0;
+    }
+    .card.is-visible::before {
+      transform: scaleY(1);
+      opacity: 1;
+    }
+    .card.is-visible {
+      border-color: rgba(0,200,255,0.20);
+      box-shadow: 0 4px 24px rgba(0,0,0,0.25);
+    }
+    .card:active { transform: scale(0.96); }
+
+    .card-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      background: var(--accent-dim);
+      border: 1px solid rgba(0,200,255,0.14);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .card p {
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--light-gray);
+      line-height: 1.55;
+      letter-spacing: 0.1px;
+    }
+
+    /* ─────────────────────────────────────
+       DASH DIVIDER
+    ───────────────────────────────────── */
+    .dot-divider {
+      background: var(--dark);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 5px;
+      padding: 16px 0 32px;
+      position: relative;
+      z-index: 1;
+    }
+    .dot-divider span {
+      display: block;
+      border-radius: 2px;
+      background: var(--accent);
+    }
+    .dot-divider span:nth-child(1),
+    .dot-divider span:nth-child(5) { width: 4px; height: 4px; border-radius: 50%; opacity: 0.15; }
+    .dot-divider span:nth-child(2),
+    .dot-divider span:nth-child(4) { width: 18px; height: 2.5px; opacity: 0.38; }
+    .dot-divider span:nth-child(3) { width: 36px; height: 2.5px; opacity: 1; }
+
+    /* ─────────────────────────────────────
+       7. VIDEO 2
+    ───────────────────────────────────── */
+    .video-section2 {
+      background: transparent;
+      padding: 0 24px 48px;
+      display: flex;
+      justify-content: center;
+      position: relative;
+      z-index: 1;
+    }
+    .video-section2 .video-wrap { width: 100%; }
+
+    /* ─────────────────────────────────────
+       9. CONCIERGE
+    ───────────────────────────────────── */
+    .concierge {
+      background: var(--dark);
+      padding: 0 20px 58px;
+      position: relative;
+      z-index: 1;
+    }
+    /* Glow rainbow card */
+    .concierge-card {
+      --hue-speed: 1;
+      --animation-speed: 4s;
+      position: relative;
+      border-radius: 22px;
+      padding: 2px;
+      z-index: 2;
+      background: hsl(0deg 0% 16%) radial-gradient(
+        30% 30% at calc(var(--bg-x) * 1%) calc(var(--bg-y) * 1%),
+        hsl(calc(var(--hue) * 1deg) 100% 90%) 0%,
+        hsl(calc(var(--hue) * 1deg) 100% 70%) 20%,
+        hsl(calc(var(--hue) * 1deg) 100% 50%) 40%,
+        transparent 100%
+      );
+      animation: hue-animation var(--animation-speed) linear infinite,
+                 rotate-bg var(--animation-speed) linear infinite;
+    }
+    .concierge-card .glow {
+      display: block;
+      position: absolute;
+      width: 80px;
+      height: 80px;
+      top: calc(50% - 40px);
+      left: calc(50% - 40px);
+      border-radius: calc(var(--glow-radius) * 1px);
+      animation: rotate var(--animation-speed) linear infinite;
+      transform: rotateZ(calc(var(--rotate) * 1deg));
+      transform-origin: center;
+      z-index: 0;
+      pointer-events: none;
+    }
+    .concierge-card .glow::after {
+      content: '';
+      display: block;
+      position: absolute;
+      left: -15%; top: -15%;
+      width: 130%; height: 130%;
+      filter: blur(calc(var(--glow-blur) * 10px));
+      background: hsl(calc(var(--hue) * 1deg) 100% 60%);
+      border-radius: calc(var(--glow-radius) * 1px);
+      animation: hue-animation var(--animation-speed) linear infinite;
+      transform: scaleY(calc(var(--glow-scale) / 1.1))
+                 scaleX(calc(var(--glow-scale) * 1.2))
+                 translateY(calc(var(--glow-translate-y) * 1%));
+      opacity: var(--glow-opacity);
+      z-index: -2;
+    }
+    .concierge-card-inner {
+      background: var(--card-bg);
+      border-radius: 20px;
+      padding: 34px 26px 32px;
+      text-align: center;
+      position: relative;
+      z-index: 1;
+    }
+    .concierge-card h2 {
+      font-family: var(--font-d);
+      font-size: 34px;
+      font-weight: 900;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 14px;
+      line-height: 1.1;
+    }
+    .concierge-desc {
+      font-size: 14px;
+      line-height: 1.82;
+      color: var(--light-gray);
+      margin-bottom: 30px;
+    }
+    .contact-row {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      flex-wrap: nowrap;
+    }
+    .contact-item {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-decoration: none;
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      border: 1px solid rgba(255,255,255,0.12);
+      background: rgba(255,255,255,0.05);
+      transition: background 0.22s, border-color 0.22s, transform 0.18s;
+      will-change: transform;
+      color: white;
+    }
+    .contact-item.whatsapp:hover { background: #25D366; border-color: #25D366; }
+    .contact-item.email:hover    { background: var(--accent2); border-color: var(--accent2); }
+    .contact-item:active         { transform: scale(0.92); }
+    .contact-icon {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .contact-label {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--white);
+      letter-spacing: 0.2px;
+    }
+
+    /* ─────────────────────────────────────
+       FOTOS DA VIAGEM
+    ───────────────────────────────────── */
+    .fotos-section {
+      background: var(--dark);
+      padding: 0 20px 56px;
+      position: relative;
+      z-index: 1;
+    }
+    .fotos-section .section-title { margin-bottom: 40px; }
+    .carousel-wrapper {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 14px;
+    }
+    .carousel-btn {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      border: 1px solid rgba(255,255,255,0.14);
+      background: rgba(255,255,255,0.05);
+      color: var(--white);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      flex-shrink: 0;
+      transition: background 0.22s, border-color 0.22s, transform 0.18s;
+      z-index: 10;
+    }
+    .carousel-btn:hover { background: rgba(0,200,255,0.14); border-color: rgba(0,200,255,0.40); }
+    .carousel-btn:active { transform: scale(0.90); }
+    .stacked-cards-wrapper {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 360px;
+    }
+    .stacked-cards {
+      position: relative;
+      width: 260px;
+      height: 320px;
+    }
+    .stack-card {
+      position: absolute;
+      width: 260px;
+      height: 320px;
+      background: #fff;
+      border-radius: 18px;
+      overflow: hidden;
+      cursor: pointer;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.40);
+      transition: transform 0.40s cubic-bezier(0.4,0,0.2,1);
+    }
+    .stack-card--1 { z-index: 4; }
+    .stack-card--2 { z-index: 3; }
+    .stack-card--3 { z-index: 2; }
+    .stack-card--4 { z-index: 1; }
+    .stack-card-img {
+      width: calc(100% - 12px);
+      margin: 6px 6px 0;
+      height: 248px;
+      border-radius: 13px;
+      overflow: hidden;
+      background: var(--placeholder);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .stack-card-img img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      cursor: zoom-in;
+    }
+    .stack-card-img-ph {
+      font-size: 10px;
+      color: var(--gray);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+    }
+    .stack-card-info { padding: 12px 14px 8px; }
+    .stack-card-info h3 {
+      font-family: var(--font-b);
+      font-size: 13px;
+      font-weight: 700;
+      color: #1a1f2e;
+      margin-bottom: 3px;
+    }
+    .stack-card-info p { font-size: 11px; color: #888; font-family: var(--font-b); }
+
+    /* Dots */
+    .carousel-dots {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      margin-top: 22px;
+    }
+    .carousel-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.22);
+      transition: background 0.22s, transform 0.22s;
+      cursor: pointer;
+    }
+    .carousel-dot.active {
+      background: var(--accent);
+      transform: scale(1.35);
+    }
+
+    /* Modal */
+    .foto-modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.92);
+      z-index: 2000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.28s ease;
+    }
+    .foto-modal.open { opacity: 1; pointer-events: auto; }
+    .foto-modal-close {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      border: 1px solid rgba(255,255,255,0.25);
+      background: rgba(255,255,255,0.10);
+      color: #fff;
+      font-size: 22px;
+      line-height: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .foto-modal-close:hover { background: rgba(255,255,255,0.22); }
+    .foto-modal-img {
+      max-width: 92vw;
+      max-height: 82vh;
+      border-radius: 14px;
+      object-fit: contain;
+      transform: scale(0.88);
+      transition: transform 0.30s ease;
+    }
+    .foto-modal.open .foto-modal-img { transform: scale(1); }
+
+    /* ─────────────────────────────────────
+       8. PULSEIRA & KIT
+    ───────────────────────────────────── */
+    .kit-footer-bg {
+      position: relative;
+      background: url('./images/footer-ciclista.png') center 160% / cover no-repeat;
+    }
+    .kit-section {
+      background: transparent;
+      padding: 200px 30px 54px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 30px;
+      position: relative;
+      z-index: 1;
+    }
+    .kit-title {
+      font-family: var(--font-d);
+      font-size: 56px;
+      font-weight: 900;
+      letter-spacing: 2px;
+      text-align: center;
+      line-height: 1.0;
+      text-transform: uppercase;
+      color: #292f44;
+    }
+    .kit-image-wrap {
+      position: relative;
+    }
+    .kit-glow { display: none; }
+    .kit-image {
+      background: transparent;
+      border-radius: 0;
+      overflow: visible;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      z-index: 1;
+      border: none;
+    }
+    @keyframes float {
+      0%   { transform: translateY(0px); }
+      50%  { transform: translateY(-10px); }
+      100% { transform: translateY(0px); }
+    }
+    @keyframes floatShadow {
+      0%   { transform: translateX(-50%) scaleX(1);    opacity: 0.25; }
+      50%  { transform: translateX(-50%) scaleX(0.78); opacity: 0.12; }
+      100% { transform: translateX(-50%) scaleX(1);    opacity: 0.25; }
+    }
+    .kit-image-wrap {
+      position: relative;
+    }
+    .kit-image-wrap::after {
+      content: '';
+      position: absolute;
+      bottom: -12px;
+      left: 50%;
+      transform: translateX(-50%) scaleX(1);
+      width: 140px;
+      height: 10px;
+      background: radial-gradient(ellipse, rgba(0,0,0,0.45) 0%, transparent 75%);
+      border-radius: 50%;
+      animation: floatShadow 3.5s ease-in-out infinite;
+    }
+    .kit-image img {
+      width: 160px;
+      height: auto;
+      animation: float 3.5s ease-in-out infinite;
+    }
+    .kit-text {
+      text-align: center;
+      font-size: 15px;
+      font-weight: 400;
+      line-height: 1.80;
+      color: #292f44;
+      max-width: 310px;
+    }
+    .kit-text strong { color: #292f44; font-weight: 600; }
+
+    /* ─────────────────────────────────────
+       10. FOOTER HERO
+    ───────────────────────────────────── */
+    .footer-hero {
+      position: relative;
+      width: 100%;
+      height: 280px;
+      overflow: hidden;
+    }
+    /* ─────────────────────────────────────
+       11. FOOTER
+    ───────────────────────────────────── */
+    .footer {
+      background: var(--dark);
+      padding: 0 20px 36px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 22px;
+      position: relative;
+      z-index: 1;
+    }
+    /* Accent line at top */
+    .footer::before {
+      content: '';
+      display: block;
+      width: 100%;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(0,200,255,0.35) 30%, rgba(0,200,255,0.35) 70%, transparent);
+      margin-bottom: 8px;
+    }
+    .footer-logo { width: 130px; }
+    .footer-logo img { width: 100%; display: block; }
+    .footer-rule {
+      width: 1px;
+      height: 24px;
+      background: var(--card-border);
+    }
+
+    .social-row { display: flex; gap: 10px; align-items: center; }
+    .social-icon {
+      width: 38px;
+      height: 38px;
+      border-radius: 11px;
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-decoration: none;
+      transition: background 0.22s, border-color 0.22s, transform 0.18s;
+    }
+    .social-icon:hover {
+      background: var(--accent-dim);
+      border-color: rgba(0,200,255,0.32);
+    }
+    .social-icon:active {
+      background: var(--accent2);
+      border-color: var(--accent2);
+      transform: scale(0.88);
+    }
+
+    .sponsor-label {
+      font-size: 11px;
+      color: var(--gray);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      text-align: center;
+    }
+
+    .biketour-logo { width: 140px; }
+    .biketour-logo img { width: 100%; display: block; }
+    @keyframes shimmer-sweep {
+      0%   { background-position-x: -100%; }
+      50%  { background-position-x: 250%; }
+      100% { background-position-x: 250%; }
+    }
+    .shimmer-text {
+      background: linear-gradient(
+        to right,
+        #EEF4FF 0%,
+        #ffffff 42%,
+        #c8f0ff 50%,
+        #ffffff 58%,
+        #EEF4FF 100%
+      );
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-size: 50% 100%;
+      background-repeat: no-repeat;
+      background-position-x: 250%;
+      animation: shimmer-sweep 3s linear 1s infinite;
+    }
+
+    @keyframes hue-animation {
+      0%   { --hue: 190; }
+      50%  { --hue: 225; }
+      100% { --hue: 190; }
+    }
+    @keyframes rotate-bg {
+      0%   { --bg-x: 0;   --bg-y: 0;   }
+      25%  { --bg-x: 100; --bg-y: 0;   }
+      50%  { --bg-x: 100; --bg-y: 100; }
+      75%  { --bg-x: 0;   --bg-y: 100; }
+      100% { --bg-x: 0;   --bg-y: 0;   }
+    }
+    @keyframes rotate {
+      from { --rotate: -70;  --glow-translate-y: -65; }
+      to   { --rotate: 290;  --glow-translate-y: -65; }
+    }
+
+    .footer-copy {
+      font-size: 11px;
+      color: var(--gray);
+      text-align: center;
+      opacity: 0.50;
+      padding-bottom: 4px;
+      letter-spacing: 0.3px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ══════════════════════════════════
+       1. HERO + MONTANHA + TEXTOS
+  ════════════════════════════════════ -->
+  <div class="hero-area">
+
+    <section class="hero">
+      <img src="./images/hero2-ciclistas.png" alt="Ciclista Bike Tour"
+           style="position:absolute;inset:0;width:100%;height:100%;
+                  object-fit:cover;object-position:center center;">
+      <div class="hero-logo fade-in">
+        <img src="./images/logo-porto-vale.png" alt="Porto Vale Consórcio">
+      </div>
+    </section>
+
+    <div class="mountain-bridge">
+      <img src="./images/montanha.png" alt="Montanha">
+    </div>
+
+    <div class="hero-texts-overlay">
+      <section class="welcome">
+        <h1 class="fade-up delay-1">
+          Bem-vindo à sua<em>experiência exclusiva</em>do Bike Tour!
+        </h1>
+        <span class="welcome-diamond"></span>
+      </section>
+      <section class="tagline">
+        <p class="fade-up delay-2">
+          Onde tem cuidado,<br>tem <em>Porto Vale</em>.
+        </p>
+      </section>
+    </div>
+
+  </div>
+
+
+  <!-- ══════════════════════════════════
+       4. VÍDEO 1
+  ════════════════════════════════════ -->
+  <section class="mountain-section reveal">
+
+    <p class="play-label">Aperte o Play</p>
+
+    <div class="video-wrap">
+      <div class="video-block" id="video1">
+        <span class="vid-label">vídeo</span>
+        <button class="play-btn" aria-label="Reproduzir vídeo 1"
+                onclick="playVideo('video1','./videos/video1.mp4')">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="white">
+            <polygon points="6,3 20,12 6,21"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+    <!--
+      ★ VÍDEO 1 — atualize a URL no onclick:
+        MP4 local  → './videos/video1.mp4'
+        YouTube    → 'https://www.youtube.com/embed/ID_DO_VIDEO?autoplay=1'
+    -->
+
+    <p class="description-text">
+      Descubra como unimos experiência, cuidado e nossos negócios
+      para tornar esta jornada única.
+    </p>
+
+  </section>
+
+
+  <!-- ══════════════════════════════════
+       6. DESTAQUES PORTO VALE
+  ════════════════════════════════════ -->
+  <section class="destaques reveal">
+    <h2 class="section-title">
+      Autoridade e confiança<br>
+      <span class="accent-word">em cada experiência</span>
+    </h2>
+
+    <div class="cards-grid">
+
+      <!-- Card 1 -->
+      <div class="card">
+        <div class="card-icon">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none"
+               stroke="#00C8FF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="8" r="6"/>
+            <path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/>
+          </svg>
+        </div>
+        <p>Maior corretora de consórcio e seguros do Brasil</p>
+      </div>
+
+      <!-- Card 2 -->
+      <div class="card">
+        <div class="card-icon">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none"
+               stroke="#00C8FF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="20" x2="18" y2="10"/>
+            <line x1="12" y1="20" x2="12" y2="4"/>
+            <line x1="6"  y1="20" x2="6"  y2="14"/>
+            <line x1="2"  y1="20" x2="22" y2="20"/>
+          </svg>
+        </div>
+        <p>Planejamento de patrimônio com consórcios</p>
+      </div>
+
+      <!-- Card 3 -->
+      <div class="card">
+        <div class="card-icon">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none"
+               stroke="#00C8FF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06
+                     a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78
+                     1.06-1.06a5.5 5.5 0 000-7.78z"/>
+          </svg>
+        </div>
+        <p>Proteção de famílias com seguros de vida</p>
+      </div>
+
+      <!-- Card 4 -->
+      <div class="card">
+        <div class="card-icon">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none"
+               stroke="#00C8FF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
+          </svg>
+        </div>
+        <p>Saúde com planos personalizados</p>
+      </div>
+
+      <!-- Card 5 -->
+      <div class="card">
+        <div class="card-icon">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none"
+               stroke="#00C8FF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="2" y="7" width="20" height="14" rx="2"/>
+            <path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/>
+            <line x1="12" y1="12" x2="12" y2="16"/>
+            <line x1="10" y1="14" x2="14" y2="14"/>
+          </svg>
+        </div>
+        <p>Soluções completas para empresas (seguros corporativos, frota)</p>
+      </div>
+
+      <!-- Card 6 -->
+      <div class="card">
+        <div class="card-icon">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none"
+               stroke="#00C8FF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/>
+            <circle cx="12" cy="7" r="4"/>
+          </svg>
+        </div>
+        <p>Consultoria individualizada para cada cliente</p>
+      </div>
+
+    </div>
+  </section>
+
+
+  <!-- dash divider -->
+  <div class="dot-divider">
+    <span></span><span></span><span></span><span></span><span></span>
+  </div>
+
+
+  <!-- ══════════════════════════════════
+       9. CONCIERGE PORTO VALE
+  ════════════════════════════════════ -->
+  <section class="concierge reveal">
+    <div class="concierge-card">
+      <span class="glow"></span>
+      <div class="concierge-card-inner">
+
+        <h2>Concierge Porto Vale</h2>
+
+        <p class="concierge-desc">
+          Nosso CEO, Fernando Gianjiope, está pessoalmente à disposição para informações sobre nossas experiências e soluções.
+        </p>
+
+        <div class="contact-row">
+
+          <!--
+            ★ WHATSAPP — atualize o número:
+            Formato: https://wa.me/55 + DDD + número (sem espaços)
+          -->
+          <a href="https://wa.me/5512982520000"
+             class="contact-item whatsapp" target="_blank" rel="noopener">
+            <div class="contact-icon whatsapp">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="white">
+                <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15
+                         -.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463
+                         -2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606
+                         .134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371
+                         -.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51
+                         -.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016
+                         -1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487
+                         .709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758
+                         -.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/>
+                <path d="M12.004 2C6.477 2 2 6.477 2 12.004c0 1.77.462 3.434 1.268 4.88L2 22l5.25
+                         -1.375A9.952 9.952 0 0012.004 22C17.531 22 22 17.523 22 12.004 22 6.477
+                         17.531 2 12.004 2zm0 18.14a8.133 8.133 0 01-4.143-1.131l-.297-.177-3.116
+                         .817.833-3.034-.194-.312A8.146 8.146 0 013.86 12.004c0-4.494 3.657-8.15
+                         8.144-8.15 4.491 0 8.148 3.656 8.148 8.15 0 4.494-3.657 8.136-8.148 8.136z"/>
+              </svg>
+            </div>
+          </a>
+
+          <!--
+            ★ E-MAIL — atualize o endereço
+          -->
+          <a href="mailto:gianjiope@uol.com.br" class="contact-item email">
+            <div class="contact-icon email">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+                   stroke="white" stroke-width="2"
+                   stroke-linecap="round" stroke-linejoin="round">
+                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+                <polyline points="22,6 12,13 2,6"/>
+              </svg>
+            </div>
+          </a>
+
+        </div>
+
+        <div class="social-row" style="justify-content:center; margin-top:22px;">
+          <a href="https://www.instagram.com/portovaleconsorcio/" class="social-icon" aria-label="Instagram" target="_blank" rel="noopener">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/>
+              <path d="M16 11.37A4 4 0 1112.63 8 4 4 0 0116 11.37z"/>
+              <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/>
+            </svg>
+          </a>
+          <a href="https://www.facebook.com/portovaleconsorcios" class="social-icon" aria-label="Facebook" target="_blank" rel="noopener">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="white">
+              <path d="M18 2h-3a5 5 0 00-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 011-1h3z"/>
+            </svg>
+          </a>
+          <a href="https://www.youtube.com/@portovaleconsorcio676" class="social-icon" aria-label="YouTube" target="_blank" rel="noopener">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="white">
+              <path d="M22.54 6.42a2.78 2.78 0 00-1.95-1.96C18.88 4 12 4 12 4s-6.88 0-8.59.46a2.78 2.78 0 00-1.95 1.96A29 29 0 001 12a29 29 0 00.46 5.58 2.78 2.78 0 001.95 1.95C5.12 20 12 20 12 20s6.88 0 8.59-.47a2.78 2.78 0 001.95-1.95A29 29 0 0023 12a29 29 0 00-.46-5.58zM9.75 15.02V8.98L15.5 12l-5.75 3.02z"/>
+            </svg>
+          </a>
+          <a href="https://www.linkedin.com/company/portovaleconsorcio/posts/?feedView=all" class="social-icon" aria-label="LinkedIn" target="_blank" rel="noopener">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="white">
+              <path d="M16 8a6 6 0 016 6v7h-4v-7a2 2 0 00-2-2 2 2 0 00-2 2v7h-4v-7a6 6 0 016-6zM2 9h4v12H2z"/>
+              <circle cx="4" cy="4" r="2"/>
+            </svg>
+          </a>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ══════════════════════════════════
+       FOTOS DA VIAGEM PASSADA
+  ════════════════════════════════════ -->
+  <section class="fotos-section reveal">
+    <h2 class="section-title">Nossas memórias<br><span class="accent-word">com o Biketour</span></h2>
+
+    <div class="carousel-wrapper">
+
+      <button class="carousel-btn" id="btnPrev" aria-label="Anterior">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+      </button>
+
+      <div class="stacked-cards-wrapper">
+        <div class="stacked-cards" id="stackedCards">
+
+          <div class="stack-card stack-card--4" data-index="3">
+            <div class="stack-card-img">
+              <img src="./images/memoria4.jpeg" alt="Memória 4">
+            </div>
+            <div class="stack-card-info">
+              <h3>Bike Tour 2024</h3>
+              <p>Toque na foto para ampliar</p>
+            </div>
+          </div>
+
+          <div class="stack-card stack-card--3" data-index="2">
+            <div class="stack-card-img">
+              <img src="./images/memoria3.jpeg" alt="Memória 3">
+            </div>
+            <div class="stack-card-info">
+              <h3>Trilha da Serra</h3>
+              <p>Percurso desafiador e inesquecível</p>
+            </div>
+          </div>
+
+          <div class="stack-card stack-card--2" data-index="1">
+            <div class="stack-card-img">
+              <img src="./images/memoria2.jpeg" alt="Memória 2">
+            </div>
+            <div class="stack-card-info">
+              <h3>Equipe Porto Vale</h3>
+              <p>União e companheirismo em cada pedal</p>
+            </div>
+          </div>
+
+          <div class="stack-card stack-card--1" data-index="0">
+            <div class="stack-card-img">
+              <img src="./images/memoria1.jpeg" alt="Memória 1">
+            </div>
+            <div class="stack-card-info">
+              <h3>Bike Tour 2024</h3>
+              <p>Toque na foto para ampliar</p>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <button class="carousel-btn" id="btnNext" aria-label="Próximo">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+      </button>
+
+    </div>
+
+    <div class="carousel-dots" id="carouselDots">
+      <span class="carousel-dot active"></span>
+      <span class="carousel-dot"></span>
+      <span class="carousel-dot"></span>
+      <span class="carousel-dot"></span>
+    </div>
+
+  </section>
+
+  <!-- Modal de foto -->
+  <div class="foto-modal" id="fotoModal">
+    <button class="foto-modal-close" id="fotoModalClose">&#x2715;</button>
+    <img class="foto-modal-img" id="fotoModalImg" src="" alt="Foto ampliada">
+  </div>
+
+
+  <!-- ══════════════════════════════════
+       8. VÍDEO 2 + PULSEIRA + FOOTER HERO
+  ════════════════════════════════════ -->
+  <div class="kit-footer-bg">
+
+    <!-- PULSEIRA & KIT -->
+    <section class="kit-section reveal">
+
+      <h2 class="kit-title">Pulseira<br>&amp; Kit</h2>
+
+      <div class="kit-image-wrap">
+        <div class="kit-glow"></div>
+        <div class="kit-image">
+          <img src="./images/pulseira-2.png" alt="Pulseira Porto Vale">
+        </div>
+      </div>
+
+      <p class="kit-text">
+        A pulseira <strong>acompanha você durante o percurso</strong>
+        e reforça a exclusividade da experiência.
+      </p>
+
+    </section>
+
+    <!-- FOOTER HERO -->
+    <section class="footer-hero"></section>
+
+  </div>
+
+
+  <!-- ══════════════════════════════════
+       11. FOOTER
+  ════════════════════════════════════ -->
+  <footer class="footer">
+
+    <!-- Logo Porto Vale -->
+    <div class="footer-logo">
+      <img src="./images/logo-porto-vale.png" alt="Porto Vale Consórcio">
+    </div>
+
+    <div class="footer-rule"></div>
+
+    <p class="sponsor-label">Patrocinadora oficial da:</p>
+
+    <!-- Logo BikeTour -->
+    <div class="biketour-logo">
+      <img src="./images/logo-biketour.png" alt="BikeTour">
+    </div>
+
+    <p class="footer-copy">© Porto Vale Consórcio — Todos os direitos reservados</p>
+
+  </footer>
+
+
+  <!-- ══════════════════════════════════
+       SCRIPTS
+  ════════════════════════════════════ -->
+  <script>
+    /**
+     * playVideo(blockId, src)
+     * src pode ser:
+     *   - Caminho local:   './videos/video1.mp4'
+     *   - Embed YouTube:   'https://www.youtube.com/embed/ID?autoplay=1'
+     *   - Vimeo embed:     'https://player.vimeo.com/video/ID?autoplay=1'
+     */
+    function playVideo(blockId, src) {
+      var block = document.getElementById(blockId);
+      if (!block) return;
+      var isEmbed = src.indexOf('youtube.com/embed') > -1 || src.indexOf('vimeo.com') > -1;
+      var radius = '14px';
+      if (isEmbed) {
+        block.innerHTML =
+          '<iframe src="' + src + '" width="100%" height="100%"'
+          + ' frameborder="0" allow="autoplay; encrypted-media; fullscreen"'
+          + ' allowfullscreen'
+          + ' style="position:absolute;inset:0;border-radius:' + radius + ';border:none;">'
+          + '</iframe>';
+      } else {
+        block.innerHTML =
+          '<video src="' + src + '" width="100%" height="100%"'
+          + ' controls autoplay playsinline'
+          + ' style="position:absolute;inset:0;border-radius:' + radius + ';'
+          + 'object-fit:cover;background:#000;">'
+          + '</video>';
+      }
+    }
+
+    /* Magnetic effect on concierge buttons */
+    (function () {
+      var row = document.querySelector('.contact-row');
+      if (!row) return;
+      var items = Array.prototype.slice.call(row.querySelectorAll('.contact-item'));
+      var cur = items.map(function () { return { x: 0, y: 0, s: 1 }; });
+      var tgt = items.map(function () { return { x: 0, y: 0, s: 1 }; });
+      var mx = -999, my = -999, raf = null;
+
+      row.addEventListener('mousemove', function (e) {
+        var r = row.getBoundingClientRect();
+        mx = e.clientX - r.left;
+        my = e.clientY - r.top;
+        if (!raf) raf = requestAnimationFrame(tick);
+      });
+      row.addEventListener('mouseleave', function () {
+        mx = -999; my = -999;
+        if (!raf) raf = requestAnimationFrame(tick);
+      });
+
+      function tick() {
+        var rr = row.getBoundingClientRect();
+        var settled = true;
+        items.forEach(function (item, i) {
+          var ir = item.getBoundingClientRect();
+          var cx = ir.left - rr.left + ir.width  / 2;
+          var cy = ir.top  - rr.top  + ir.height / 2;
+          var dx = mx - cx, dy = my - cy;
+          var dist = Math.sqrt(dx * dx + dy * dy);
+          var pull = dist < 130 ? (1 - dist / 130) : 0;
+          tgt[i].x = dx * 0.28 * pull;
+          tgt[i].y = dy * 0.28 * pull;
+          tgt[i].s = 1 + pull * 0.18;
+          var k = 0.16;
+          cur[i].x += (tgt[i].x - cur[i].x) * k;
+          cur[i].y += (tgt[i].y - cur[i].y) * k;
+          cur[i].s += (tgt[i].s - cur[i].s) * k;
+          if (Math.abs(cur[i].x) > 0.01 || Math.abs(cur[i].y) > 0.01 || Math.abs(cur[i].s - 1) > 0.001) settled = false;
+          item.style.transform = 'translate(' + cur[i].x.toFixed(2) + 'px,' + cur[i].y.toFixed(2) + 'px) scale(' + cur[i].s.toFixed(3) + ')';
+        });
+        raf = settled ? null : requestAnimationFrame(tick);
+      }
+    })();
+
+    /* Animate sections on scroll-in */
+    (function () {
+      if (!('IntersectionObserver' in window)) return;
+      var sections = document.querySelectorAll('.reveal');
+      var io = new IntersectionObserver(function (entries) {
+        entries.forEach(function (entry) {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('revealed');
+            io.unobserve(entry.target);
+          }
+        });
+      }, { threshold: 0.08 });
+      sections.forEach(function (s) { io.observe(s); });
+    })();
+
+    /* Stacked cards carousel */
+    (function () {
+      var stack   = document.getElementById('stackedCards');
+      var btnPrev = document.getElementById('btnPrev');
+      var btnNext = document.getElementById('btnNext');
+      var dotsEl  = document.getElementById('carouselDots');
+      var modal   = document.getElementById('fotoModal');
+      var modalImg= document.getElementById('fotoModalImg');
+      var modalClose = document.getElementById('fotoModalClose');
+      if (!stack) return;
+
+      var cards   = Array.prototype.slice.call(stack.querySelectorAll('.stack-card'));
+      var dots    = dotsEl ? Array.prototype.slice.call(dotsEl.querySelectorAll('.carousel-dot')) : [];
+      var topIdx  = cards.length - 1; // last in DOM = top
+      var animating = false;
+      var totalCards = cards.length;
+
+      function updateZ() {
+        cards.forEach(function (card, i) {
+          var pos = (topIdx - i + totalCards) % totalCards;
+          card.style.zIndex = totalCards - pos;
+        });
+      }
+      function updateDots() {
+        var activeCard = cards[topIdx];
+        var dataIdx = parseInt(activeCard.getAttribute('data-index')) || 0;
+        dots.forEach(function (d, i) { d.classList.toggle('active', i === dataIdx); });
+      }
+      updateZ();
+      updateDots();
+
+      function rotate(dir) { // dir: 1=next(→), -1=prev(←)
+        if (animating) return;
+        animating = true;
+        var topCard = cards[topIdx];
+        var outX = dir > 0 ? '130%' : '-130%';
+        var inX  = dir > 0 ? '-130%' : '130%';
+
+        topCard.style.transition = 'transform 0.38s cubic-bezier(0.4,0,0.2,1)';
+        topCard.style.transform  = 'translateX(' + outX + ') rotate(' + (dir * 4) + 'deg)';
+
+        setTimeout(function () {
+          topCard.style.transition = 'none';
+          topCard.style.transform  = 'translateX(' + inX + ') rotate(' + (-dir * 4) + 'deg)';
+          topIdx = (topIdx - dir + totalCards) % totalCards;
+          updateZ();
+          updateDots();
+          requestAnimationFrame(function () {
+            requestAnimationFrame(function () {
+              topCard.style.transition = 'transform 0.38s cubic-bezier(0.4,0,0.2,1)';
+              topCard.style.transform  = '';
+              setTimeout(function () { animating = false; }, 420);
+            });
+          });
+        }, 400);
+      }
+
+      if (btnNext) btnNext.addEventListener('click', function () { rotate(1); });
+      if (btnPrev) btnPrev.addEventListener('click', function () { rotate(-1); });
+
+      dots.forEach(function (dot, i) {
+        dot.addEventListener('click', function () {
+          var topCard = cards[topIdx];
+          var curIdx  = parseInt(topCard.getAttribute('data-index')) || 0;
+          if (i === curIdx) return;
+          rotate(i > curIdx ? 1 : -1);
+        });
+      });
+
+      // Click on top card image area → open modal
+      stack.addEventListener('click', function (e) {
+        if (animating) return;
+        var topCard = cards[topIdx];
+        if (!topCard.contains(e.target)) return;
+        var imgArea = topCard.querySelector('.stack-card-img');
+        if (!imgArea || !imgArea.contains(e.target)) return;
+        if (!modal) return;
+        var img = topCard.querySelector('img');
+        if (img && img.src) {
+          modalImg.src = img.src;
+          modalImg.style.display = 'block';
+        } else {
+          modalImg.style.display = 'none';
+        }
+        modal.classList.add('open');
+      });
+
+      // Close modal
+      if (modalClose) modalClose.addEventListener('click', function () { modal.classList.remove('open'); });
+      if (modal) modal.addEventListener('click', function (e) {
+        if (e.target === modal) modal.classList.remove('open');
+      });
+    })();
+
+    /* Animate cards on scroll-in */
+    (function () {
+      if (!('IntersectionObserver' in window)) return;
+      var cards = document.querySelectorAll('.card');
+      var io = new IntersectionObserver(function (entries) {
+        entries.forEach(function (entry, idx) {
+          if (entry.isIntersecting) {
+            var el = entry.target;
+            el.style.opacity = '0';
+            el.style.transform = 'translateY(20px)';
+            setTimeout(function () {
+              el.style.transition =
+                'opacity 0.52s cubic-bezier(0.22,1,0.36,1), '
+                + 'transform 0.52s cubic-bezier(0.22,1,0.36,1), '
+                + 'border-color 0.30s';
+              el.style.opacity   = '1';
+              el.style.transform = 'translateY(0)';
+              el.classList.add('is-visible');
+            }, idx * 75);
+            io.unobserve(el);
+          }
+        });
+      }, { threshold: 0.12 });
+      cards.forEach(function (c) { c.style.opacity = '0'; io.observe(c); });
+    })();
+  </script>
+
+</body>
+</html>
