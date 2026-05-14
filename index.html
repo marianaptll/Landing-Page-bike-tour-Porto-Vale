@@ -226,7 +226,7 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      padding: 0 0 44px;
+      padding: 0 0 36px;
       position: relative;
       z-index: 1;
     }
@@ -241,6 +241,16 @@
       margin-bottom: 26px;
       text-align: center;
       position: relative;
+    }
+    .video-caption {
+      font-size: 15px;
+      font-weight: 400;
+      color: var(--white);
+      text-align: center;
+      line-height: 1.6;
+      width: 100%;
+      padding: 0 16px;
+      margin-bottom: 16px;
     }
     .play-label::after {
       content: '';
@@ -269,6 +279,14 @@
         0 0 0 1px rgba(0,200,255,0.06),
         0 0 50px rgba(0,200,255,0.07),
         0 24px 64px rgba(0,0,0,0.55);
+    }
+    .video-block video {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: var(--radius);
     }
     .vid-label {
       font-family: var(--font-d);
@@ -314,7 +332,7 @@
     ───────────────────────────────────── */
     .destaques {
       background: var(--dark);
-      padding: 0 20px 52px;
+      padding: 0 20px 44px;
       position: relative;
       z-index: 1;
     }
@@ -440,7 +458,7 @@
       justify-content: center;
       align-items: center;
       gap: 5px;
-      padding: 16px 0 32px;
+      padding: 12px 0 24px;
       position: relative;
       z-index: 1;
     }
@@ -460,7 +478,7 @@
     ───────────────────────────────────── */
     .video-section2 {
       background: transparent;
-      padding: 0 24px 48px;
+      padding: 0 24px 40px;
       display: flex;
       justify-content: center;
       position: relative;
@@ -473,7 +491,7 @@
     ───────────────────────────────────── */
     .concierge {
       background: var(--dark);
-      padding: 0 20px 58px;
+      padding: 0 20px 48px;
       position: relative;
       z-index: 1;
     }
@@ -589,7 +607,7 @@
     ───────────────────────────────────── */
     .fotos-section {
       background: var(--dark);
-      padding: 0 20px 56px;
+      padding: 0 20px 32px;
       position: relative;
       z-index: 1;
     }
@@ -745,17 +763,36 @@
     ───────────────────────────────────── */
     .kit-footer-bg {
       position: relative;
-      background: url('images/footer-ciclista.png') center 160% / cover no-repeat;
+      margin-top: 0;
+      z-index: 2;
+    }
+    .kit-footer-bg-img {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center 90%;
+      z-index: 0;
     }
     .kit-section {
-      background: transparent;
-      padding: 200px 30px 54px;
+      background: #dce3e8;
+      padding: 40px 30px 36px;
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 30px;
+      gap: 16px;
       position: relative;
       z-index: 1;
+    }
+    .kit-section::before {
+      content: '';
+      position: absolute;
+      top: -48px;
+      left: 0;
+      width: 100%;
+      height: 50px;
+      background: url("data:image/svg+xml,%3Csvg viewBox='0 0 430 50' preserveAspectRatio='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0,40 Q80,0 215,28 Q340,52 430,18 L430,50 L0,50 Z' fill='%23dce3e8'/%3E%3C/svg%3E") center / 100% 100% no-repeat;
     }
     .kit-title {
       font-family: var(--font-d);
@@ -822,14 +859,38 @@
     }
     .kit-text strong { color: #292f44; font-weight: 600; }
 
+    /* ─── vídeo pulseira ─── */
+    .kit-video-section {
+      background: transparent;
+      padding: 0 24px 48px;
+      margin-top: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+      position: relative;
+      z-index: 1;
+    }
+    .kit-video-section .video-wrap { width: 100%; }
+    .kit-video-text {
+      text-align: center;
+      font-size: 15px;
+      font-weight: 400;
+      line-height: 1.80;
+      color: #292f44;
+      max-width: 310px;
+    }
+    .kit-video-text strong { color: #292f44; font-weight: 600; }
+
     /* ─────────────────────────────────────
        10. FOOTER HERO
     ───────────────────────────────────── */
     .footer-hero {
       position: relative;
       width: 100%;
-      height: 280px;
+      height: 480px;
       overflow: hidden;
+      z-index: 1;
     }
     /* ─────────────────────────────────────
        11. FOOTER
@@ -982,6 +1043,18 @@
 
 
 
+
+  <!-- ══════════════════════════════════
+       VIDEO — ENTRE MONTANHA E DESTAQUES
+  ════════════════════════════════════ -->
+  <section class="mountain-section reveal">
+    <p class="video-caption">Fundador e CEO da Porto Vale, sobre o Bike Tour e a forma como cuidamos das pessoas.</p>
+    <div class="video-wrap">
+      <div class="video-block">
+        <video src="video/video1.mp4" controls playsinline preload="none"></video>
+      </div>
+    </div>
+  </section>
 
   <!-- ══════════════════════════════════
        6. DESTAQUES PORTO VALE
@@ -1254,6 +1327,8 @@
   ════════════════════════════════════ -->
   <div class="kit-footer-bg">
 
+    <img class="kit-footer-bg-img" src="images/footer-ciclista.png" alt="">
+
     <!-- PULSEIRA & KIT -->
     <section class="kit-section reveal">
 
@@ -1271,6 +1346,19 @@
         e reforça a exclusividade da experiência.
       </p>
 
+    </section>
+
+    <!-- VÍDEO PULSEIRA -->
+    <section class="kit-video-section reveal">
+      <div class="video-wrap">
+        <div class="video-block">
+          <video src="video/video2.mp4" controls playsinline preload="none"></video>
+        </div>
+      </div>
+      <p class="kit-video-text">
+        Veja como <strong>ajustar sua pulseira</strong> para garantir
+        <strong>conforto e segurança</strong> durante <strong>todo o percurso</strong>.
+      </p>
     </section>
 
     <!-- FOOTER HERO -->
